@@ -2,6 +2,11 @@
 import { useState } from 'react';
 import { useStore } from './store';
 
+const API_BASE_URL =
+    process.env.NODE_ENV === 'production'
+        ? 'https://pipeline-builder-rust.vercel.app'
+        : (process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000');
+
 export const SubmitButton = () => {
     const nodes = useStore((state) => state.nodes);
     const edges = useStore((state) => state.edges);
@@ -13,7 +18,7 @@ export const SubmitButton = () => {
         setIsSubmitting(true);
         setError('');
         try {
-            const response = await fetch('http://localhost:8000/pipelines/parse', {
+            const response = await fetch(`${API_BASE_URL}/pipelines/parse`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
