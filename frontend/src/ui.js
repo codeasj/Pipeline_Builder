@@ -101,6 +101,11 @@ export const PipelineUI = () => {
                 <Controls />
                 <MiniMap pannable zoomable />
             </ReactFlow>
+            {nodes.length === 0 ? (
+                <div className="canvas-empty-tip">
+                    Drag nodes from the toolbar to start building your pipeline.
+                </div>
+            ) : null}
         </div>
         </>
     )

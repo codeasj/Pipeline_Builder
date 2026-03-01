@@ -25,7 +25,7 @@ const getUniqueVariables = (text) => {
 export const TextNode = ({ id, data }) => {
   const updateNodeField = useStore((state) => state.updateNodeField);
   const updateNodeInternals = useUpdateNodeInternals();
-  const [currText, setCurrText] = useState(data?.text || '{{input}}');
+  const [currText, setCurrText] = useState(data?.text || 'Hello {{input}} from {{user_name}}');
   const textareaRef = useRef(null);
 
   const variableNames = useMemo(() => getUniqueVariables(currText), [currText]);

@@ -1,0 +1,84 @@
+# Pipeline Builder (VectorShift Frontend Assessment)
+
+This project is a drag-and-drop pipeline builder built with:
+- Frontend: React + React Flow + Zustand
+- Backend: FastAPI
+
+## What It Does
+
+- Lets users drag nodes into a canvas and connect them into a pipeline.
+- Supports multiple node types (Input, Output, LLM, Text, and additional demo nodes).
+- `Text` node supports:
+  - Auto-resizing text area / node sizing as content grows.
+  - Variable detection from `{{variableName}}` patterns.
+  - Dynamic input handles for detected variables.
+- Submit sends the current pipeline (`nodes`, `edges`) to backend.
+- Backend returns:
+  - `num_nodes`
+  - `num_edges`
+  - `is_dag` (whether graph is a Directed Acyclic Graph)
+- Frontend shows this response in an in-app modal.
+
+## Project Structure
+
+- `frontend/` React app
+- `backend/` FastAPI app
+
+## How To Run
+
+### 1) Run Backend
+
+```powershell
+cd backend
+uvicorn main:app --reload
+```
+
+Backend: `http://localhost:8000`
+
+### 2) Run Frontend (new terminal)
+
+```powershell
+cd frontend
+npm install
+npm start
+```
+
+Frontend: `http://localhost:3000`
+
+## How To Use
+
+1. Drag nodes from the toolbar into the canvas.
+2. Connect handles to create a pipeline.
+3. Click `Submit Pipeline`.
+4. Read node/edge counts and DAG result in the modal.
+
+## DAG Quick Test
+
+To get `is_dag: No`, create a cycle:
+- Connect `Math -> Condition`
+- Connect `Condition -> Math`
+
+Submit again.
+
+## Screen Recording Walkthrough (Suggested)
+
+1. Show UI design:
+- Dark purple themed toolbar, canvas, node cards, and controls.
+
+2. Show main functionality:
+- Drag a few nodes, connect them, click `Submit Pipeline`.
+- Show modal output: `num_nodes`, `num_edges`, `is_dag`.
+
+3. Show non-DAG case:
+- Create cycle (`Math -> Condition -> Math`) and submit.
+
+4. Show Text node behavior:
+- Type text like `Hello {{input}} from {{user_name}}`.
+- Show resizing and dynamic variable handles.
+
+5. Brief code walkthrough:
+- `frontend/src/nodes/BaseNode.js`: shared node abstraction.
+- `frontend/src/nodeRegistry.js`: centralized node registration.
+- `frontend/src/nodes/textNode.js`: variable parsing + dynamic handles + sizing.
+- `frontend/src/submit.js`: submit flow + loading + result modal.
+- `backend/main.py`: parse endpoint + DAG detection.

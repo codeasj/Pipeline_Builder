@@ -1,11 +1,17 @@
 // submit.js
+import { useState } from 'react';
 import { useStore } from './store';
 
 export const SubmitButton = () => {
     const nodes = useStore((state) => state.nodes);
     const edges = useStore((state) => state.edges);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [result, setResult] = useState(null);
+    const [error, setError] = useState('');
 
     const onSubmit = async () => {
+        setIsSubmitting(true);
+        setError('');
         try {
             const response = await fetch('http://localhost:8000/pipelines/parse', {
                 method: 'POST',
@@ -19,25 +25,51 @@ export const SubmitButton = () => {
                 throw new Error(`Request failed with status ${response.status}`);
             }
 
-            const result = await response.json();
-            window.alert(
-                [
-                    'Pipeline Analysis Complete',
-                    `Nodes: ${result.num_nodes}`,
-                    `Edges: ${result.num_edges}`,
-                    `Directed Acyclic Graph (DAG): ${result.is_dag ? 'Yes' : 'No'}`,
-                ].join('\n')
-            );
+            const parsed = await response.json();
+            setResult(parsed);
         } catch (error) {
-            window.alert(`Failed to parse pipeline: ${error.message}`);
+            setError(error.message);
+            setResult(null);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
     return (
+        <>
         <div className="submit-wrap">
-            <button type="button" className="submit-button" onClick={onSubmit}>
-                Submit Pipeline
+            <button type="button" className="submit-button" onClick={onSubmit} disabled={isSubmitting}>
+                {isSubmitting ? 'Analyzing...' : 'Submit Pipeline'}
             </button>
         </div>
+        {(result || error) ? (
+            <div className="result-overlay" role="dialog" aria-modal="true">
+                <div className="result-card">
+                    <div className="result-header">
+                        <h3>Pipeline Analysis</h3>
+                        <button
+                            type="button"
+                            className="result-close"
+                            onClick={() => {
+                                setResult(null);
+                                setError('');
+                            }}
+                        >
+                            Close
+                        </button>
+                    </div>
+                    {error ? (
+                        <p className="result-error">Failed to parse pipeline: {error}</p>
+                    ) : (
+                        <div className="result-grid">
+                            <p><span>Nodes</span><strong>{result.num_nodes}</strong></p>
+                            <p><span>Edges</span><strong>{result.num_edges}</strong></p>
+                            <p><span>Is DAG</span><strong>{result.is_dag ? 'Yes' : 'No'}</strong></p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        ) : null}
+        </>
     );
 }
